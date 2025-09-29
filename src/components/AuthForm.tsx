@@ -37,7 +37,7 @@ export const AuthForm: React.FC = () => {
             <Clock className="h-8 w-8 text-white" />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            TimeTracker Pro
+            TimeTracker
           </h2>
           <p className="mt-2 text-gray-600">
             {isSignUp ? 'Créez votre compte' : 'Connectez-vous à votre compte'}
