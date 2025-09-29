@@ -112,7 +112,7 @@ function App() {
         <div className="flex flex-col flex-grow bg-white shadow-lg">
           <div className="flex items-center px-6 py-4 border-b">
             <Clock className="h-8 w-8 text-blue-600 mr-3" />
-            <span className="text-xl font-bold text-gray-900">TimeTracker Pro</span>
+            <span className="text-xl font-bold text-gray-900">TimeTracker</span>
           </div>
 
           <nav className="mt-6 flex-1">
