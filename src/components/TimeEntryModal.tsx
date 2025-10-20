@@ -77,37 +77,57 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
 
   const handleSave = async () => {
     try {
+      let hasError = false
+      
       for (const entry of entries) {
         if (entry.clientId && entry.hours > 0) {
           if (entry.isNew) {
-            await addTimeEntry({
+            const result = await addTimeEntry({
               clientId: entry.clientId,
               date,
               hours: entry.hours,
               description: entry.description,
               amount: entry.amount
             })
+            if (result.error) {
+              alert('Erreur lors de l\'ajout: ' + result.error)
+              hasError = true
+              break
+            }
           } else if (entry.id) {
-            await updateTimeEntry(entry.id, {
+            const result = await updateTimeEntry(entry.id, {
               clientId: entry.clientId,
               date,
               hours: entry.hours,
               description: entry.description,
               amount: entry.amount
             })
+            if (result.error) {
+              alert('Erreur lors de la modification: ' + result.error)
+              hasError = true
+              break
+            }
           }
         }
       }
-      onSave()
+      
+      if (!hasError) {
+        onSave()
+      }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error)
+      alert('Erreur inattendue lors de la sauvegarde')
     }
   }
 
   const handleDelete = async (entryId: string, index: number) => {
     if (window.confirm('Supprimer cette entrée ?')) {
-      await deleteTimeEntry(entryId)
-      removeEntry(index)
+      const result = await deleteTimeEntry(entryId)
+      if (!result.error) {
+        removeEntry(index)
+      } else {
+        alert('Erreur lors de la suppression: ' + result.error)
+      }
     }
   }
 
@@ -149,14 +169,12 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
                 <h3 className="font-medium text-gray-900">
                   Entrée {index + 1}
                 </h3>
-                {entries.length > 1 && (
-                  <button
-                    onClick={() => entry.id ? handleDelete(entry.id, index) : removeEntry(index)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Supprimer
-                  </button>
-                )}
+                <button
+                  onClick={() => entry.id ? handleDelete(entry.id, index) : removeEntry(index)}
+                  className="text-red-500 hover:text-red-700 text-sm font-medium"
+                >
+                  Supprimer
+                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -230,6 +248,14 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
           >
             + Ajouter une autre entrée
           </button>
+
+          {entries.length === 0 && (
+            <div className="text-center py-8">
+              <Clock className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-lg font-medium text-gray-900">Aucune entrée</h3>
+              <p className="mt-1 text-gray-500">Cliquez sur "Ajouter une autre entrée" pour commencer.</p>
+            </div>
+          )}
 
           {totalHours > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
