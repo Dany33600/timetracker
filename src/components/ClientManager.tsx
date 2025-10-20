@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useClients } from '../hooks/useClients'
 import { ConfirmationModal } from './ConfirmationModal'
-import { Plus, Edit3, Trash2, Users, Euro } from 'lucide-react'
+import { Plus, CreditCard as Edit3, Trash2, Users, Euro } from 'lucide-react'
 
 export const ClientManager: React.FC = () => {
   const { clients, loading, addClient, updateClient, deleteClient } = useClients()
@@ -52,19 +52,9 @@ export const ClientManager: React.FC = () => {
   }
 
   const handleDelete = async (id: string) => {
-    const client = clients.find(c => c.id === id)
-    setConfirmDelete({ 
-      show: true, 
-      clientId: id, 
-      clientName: client?.name || 'ce client' 
-    })
-  }
-
-  const confirmDeleteClient = async () => {
-    if (confirmDelete.clientId) {
-      await deleteClient(confirmDelete.clientId)
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+      await deleteClient(id)
     }
-    setConfirmDelete({ show: false })
   }
 
   if (loading) {
@@ -225,18 +215,6 @@ export const ClientManager: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Modal de confirmation de suppression */}
-      <ConfirmationModal
-        isOpen={confirmDelete.show}
-        title="Supprimer ce client ?"
-        message={`Êtes-vous sûr de vouloir supprimer "${confirmDelete.clientName}" ? Cette action est irréversible et supprimera également toutes les entrées de temps associées.`}
-        confirmText="Supprimer"
-        cancelText="Annuler"
-        onConfirm={confirmDeleteClient}
-        onCancel={() => setConfirmDelete({ show: false })}
-        type="danger"
-      />
     </div>
   )
 }
