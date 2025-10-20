@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useClients } from '../hooks/useClients'
 import { useTimeEntries } from '../hooks/useTimeEntries'
+import { ConfirmationModal } from './ConfirmationModal'
 import { X, Clock, Euro, FileText } from 'lucide-react'
 
 interface TimeEntryModalProps {
@@ -12,6 +13,7 @@ interface TimeEntryModalProps {
 export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, onSave }) => {
   const { clients } = useClients()
   const { getTimeEntriesByDate, addTimeEntry, updateTimeEntry, deleteTimeEntry } = useTimeEntries()
+  const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; entryId?: string; index?: number }>({ show: false })
   
   const [entries, setEntries] = useState<Array<{
     id?: string
@@ -122,14 +124,19 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
   }
 
   const handleDelete = async (entryId: string, index: number) => {
-    if (window.confirm('Supprimer cette entrée ?')) {
-      const result = await deleteTimeEntry(entryId)
+    setConfirmDelete({ show: true, entryId, index })
+  }
+
+  const confirmDeleteEntry = async () => {
+    if (confirmDelete.entryId && confirmDelete.index !== undefined) {
+      const result = await deleteTimeEntry(confirmDelete.entryId)
       if (!result.error) {
-        removeEntry(index)
+        removeEntry(confirmDelete.index)
       } else {
         alert('Erreur lors de la suppression: ' + result.error)
       }
     }
+    setConfirmDelete({ show: false })
   }
 
   const formatDate = (dateString: string) => {
@@ -296,6 +303,18 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
           </div>
         </div>
       </div>
+
+      {/* Modal de confirmation de suppression */}
+      <ConfirmationModal
+        isOpen={confirmDelete.show}
+        title="Supprimer cette entrée ?"
+        message="Cette action est irréversible. L'entrée de temps sera définitivement supprimée."
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        onConfirm={confirmDeleteEntry}
+        onCancel={() => setConfirmDelete({ show: false })}
+        type="danger"
+      />
     </div>
   )
 }
