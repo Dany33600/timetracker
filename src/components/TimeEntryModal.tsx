@@ -24,13 +24,15 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
 
   useEffect(() => {
     const existingEntries = getTimeEntriesByDate(date)
+    console.log('Existing entries for date', date, ':', existingEntries)
     if (existingEntries.length > 0) {
       setEntries(existingEntries.map(entry => ({
         id: entry.id,
         clientId: entry.clientId,
         hours: entry.hours,
         description: entry.description,
-        amount: entry.amount
+        amount: entry.amount,
+        isNew: false
       })))
     } else {
       setEntries([{
@@ -41,7 +43,7 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
         isNew: true
       }])
     }
-  }, [date])
+  }, [date, getTimeEntriesByDate])
 
   const addNewEntry = () => {
     setEntries(prev => [...prev, {
@@ -81,7 +83,7 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
       
       for (const entry of entries) {
         if (entry.clientId && entry.hours > 0) {
-          if (entry.isNew) {
+          if (entry.isNew || !entry.id) {
             const result = await addTimeEntry({
               clientId: entry.clientId,
               date,
@@ -97,7 +99,6 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
           } else if (entry.id) {
             const result = await updateTimeEntry(entry.id, {
               clientId: entry.clientId,
-              date,
               hours: entry.hours,
               description: entry.description,
               amount: entry.amount
@@ -168,10 +169,15 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ date, onClose, o
               <div className="flex justify-between items-center">
                 <h3 className="font-medium text-gray-900">
                   Entrée {index + 1}
+                  {!entry.isNew && entry.id && (
+                    <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      Existante
+                    </span>
+                  )}
                 </h3>
                 <button
                   onClick={() => entry.id ? handleDelete(entry.id, index) : removeEntry(index)}
-                  className="text-red-500 hover:text-red-700 text-sm font-medium"
+                  className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors"
                 >
                   Supprimer
                 </button>
