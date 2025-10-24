@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   collection, 
   query, 
@@ -128,9 +128,9 @@ export const useTimeEntries = () => {
     // but kept for compatibility
   }
 
-  const getTimeEntriesByDate = (date: string) => {
+  const getTimeEntriesByDate = useCallback((date: string) => {
     return timeEntries.filter(entry => entry.date === date)
-  }
+  }, [timeEntries])
 
   const getMonthlyStats = (year: number, month: number) => {
     const monthEntries = timeEntries.filter(entry => {
